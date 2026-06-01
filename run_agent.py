@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.core.provider_factory import create_provider
 from src.agent.agent import ReActAgent
+from src.agent.agent_v2 import ReActAgentV2
 
 try:
     from src.tools.educourse_tools import TOOLS
@@ -44,6 +45,13 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--agent-version",
+        choices=["v1", "v2"],
+        default="v2",
+        help="Agent logic version. v2 recovers common Action formatting errors.",
+    )
+
+    parser.add_argument(
         "--max-steps",
         type=int,
         default=6,
@@ -61,7 +69,8 @@ def main():
         model_name=args.model,
     )
 
-    agent = ReActAgent(
+    agent_class = ReActAgentV2 if args.agent_version == "v2" else ReActAgent
+    agent = agent_class(
         llm=llm,
         tools=TOOLS,
         max_steps=args.max_steps,
@@ -73,6 +82,7 @@ def main():
     print(f"Provider model: {llm.model_name}")
     print(f"Available tools: {', '.join(tool_names)}")
     print(f"Max steps: {args.max_steps}")
+    print(f"Agent version: {args.agent_version}")
     print(f"Query: {args.query}")
 
     answer = agent.run(args.query)

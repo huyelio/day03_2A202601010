@@ -58,6 +58,11 @@ def build_agent(agent_version: str, llm: LLMProvider):
         return None, "EduCourse tools are not available yet."
 
     try:
+        if agent_version == "agent_v2":
+            from src.agent.agent_v2 import ReActAgentV2
+
+            return ReActAgentV2(llm=llm, tools=tools), None
+
         from src.agent.agent import ReActAgent
 
         return ReActAgent(llm=llm, tools=tools), None
@@ -283,7 +288,7 @@ def run_evaluation(target: str, provider: str, model: Optional[str]) -> List[Dic
     cases = get_test_cases()
     results = []
 
-    targets = ["baseline", "agent_v1"] if target == "all" else [target]
+    targets = ["baseline", "agent_v1", "agent_v2"] if target == "all" else [target]
     for current_target in targets:
         for case in cases:
             print(f"Running {current_target}: {case['id']}")
@@ -297,7 +302,7 @@ def run_evaluation(target: str, provider: str, model: Optional[str]) -> List[Dic
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run EduCourse chatbot/agent evaluation cases.")
-    parser.add_argument("--target", choices=["baseline", "agent_v1", "all"], default="baseline")
+    parser.add_argument("--target", choices=["baseline", "agent_v1", "agent_v2", "all"], default="baseline")
     parser.add_argument("--provider", choices=["openai", "gemini", "google"], default=os.getenv("DEFAULT_PROVIDER", "openai"))
     parser.add_argument("--model", default=None)
     args = parser.parse_args()
